@@ -30,6 +30,28 @@ MAX_RANK    = 14    #aces
 
 ###ratings
 
+#AKQJTNESXVURW
+NO_HAND = 0
+MAX_HI = 1535
+#Three card hands from 432 to 976 starts at 1
+NE = 51
+FNE = 70
+TV = 79
+FTV = 80
+TX = 83
+FTX = 87
+TS = 91
+FTS = 101
+TE = 106
+FTE = 126
+TN = 132
+FTN = 166
+JV = 176
+FJV =
+
+DN = [1, 4, 10, 20, 35, 56, 84, 120, 165]
+DELTAS = [1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66]
+
 STRFL = 1
 QUADS = 11
 FULL_HOUSE = 24

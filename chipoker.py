@@ -11,7 +11,7 @@ class ChiHand(object):
 
         self._hand = dealer.dealCards(HAND_SIZE)
         self._sortHand() #Planning to sort by suits(most frequent first), then values descending.
-        self._suitcounts = self._countSuits()
+        self._suitCounts = self._countSuits()
         print(str(self._suitcounts))
 
         self._makeHands(self._hand)
@@ -21,11 +21,35 @@ class ChiHand(object):
 
         self._hand.sort(key=attrgetter('_suit', '_value'), reverse=True)
 
+    def _setHands(self, cards, base):
+
+
+        #If base is hicard...
+        if base <= MAX_HI:
+            
+
     def _makeHands(self, cards):
         """Starts with a hand and returns the chinese poker hands that can be created as a list of rankings."""
 
+        foot = 0
+        ace = False
+        current = 0
+        counter = 5
+        candidate = -1
+
         if len(self._hand) == 13 or len(self._hand) == 8:
             print('Back or middle\n')
+            for suitLength in self._suitCounts:
+                if suitLength >= 5:
+                    current = self._hand[foot].getValue()
+                    if current == 14:
+                        ace = True
+
+                    while counter <= suitLength:
+                        if self._hand[foot + 4].getValue() = current - 4:
+                            candidate =
+                else:
+                    foot += suitLength
             return
         elif len(self._hand) == 3:
             print('front\n')
