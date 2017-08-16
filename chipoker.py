@@ -81,6 +81,7 @@ class ChiHand(object):
         index = 0
         single = 0
         first = 0
+        multiCounter = MULTISEQ
 
         if newBase <= A_HI:
             #Make sure the hand is sorted correctly
@@ -115,15 +116,20 @@ class ChiHand(object):
                 if counts[2] > 0:
                     multiranks[1] == hand[0].getValue()
                     index += 2
+                else:
+                    multiCounter = NOSEQ
 
             single = hand[index]._getValue()
 
             if multiranks[0] > single:
                 first = multiranks[0]
+                multiCounter = MULTISEQ
             elif multiranks[1] > single:
                 first = multiranks[1]
+                multiCounter = PAIRSEQ
             else:
                 first = single
+                index += 1
 
             #Make sure that there's an index corresponding to the rank at and directly below the hand.
             if 16 - first > len(ALL_HI):
@@ -136,10 +142,13 @@ class ChiHand(object):
                 return None
 
             mask.append(first)
-            curind = 1
-            current = cards[curind].getValue()
+            current = cards[index].getValue()
 
-            while(len(mask) < 5 and curind < 8):
+            if multiCounter = NOSEQ:
+
+            #old stuff, probably not important...
+
+            while(len(mask) < 5 and index < 8):
                 if mask[-1] == current:
                     curind += 1
                 else:

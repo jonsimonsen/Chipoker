@@ -33,6 +33,10 @@ MAX_RANK    = 14    #aces
 SUITED = 0
 VALUED = 1
 
+MULTISEQ = 0
+PAIRSEQ = 1
+NOSEQ = 2
+
 ###ratings
 
 A_HI = 1563
