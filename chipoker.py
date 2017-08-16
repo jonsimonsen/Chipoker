@@ -78,6 +78,9 @@ class ChiHand(object):
         sorting = sortmethod
         counts = counters
         newBase = base
+        index = 0
+        single = 0
+        first = 0
 
         if newBase <= A_HI:
             #Make sure the hand is sorted correctly
@@ -92,6 +95,8 @@ class ChiHand(object):
                 return None     #It's impossible not to have a pair if the hand contain quads
             if counts[1] > 1:
                 return None     #It cannot be best to have a hi-card base when the hand contains two trips
+            if counts[1] > 0 and counts[2] > 0:
+                return None     #It's better to have pairs in back and middle and the best possible hi-card in front.
             if len(cards) < 13 and counts[1] > 0:
                 return None     #It's impossible not to have a pair when having trips remaining after setting the back hand
             if counts[2] > 2:
@@ -99,8 +104,26 @@ class ChiHand(object):
             if len(cards) < 13 and counts[2] > 1:
                 return None     #Same as above
 
-            
-            first = hand[0]._getValue()
+            multiranks = [0, 0, 0]  #For trips, pair, lower pair
+            if counts[1] == 1:
+                multiranks[0] = hand[0].getValue()
+                index += 3
+            else:
+                if counts[2] == 2:
+                    multiranks[2] == hand[2].getValue()
+                    index += 2
+                if counts[2] > 0:
+                    multiranks[1] == hand[0].getValue()
+                    index += 2
+
+            single = hand[index]._getValue()
+
+            if multiranks[0] > single:
+                first = multiranks[0]
+            elif multiranks[1] > single:
+                first = multiranks[1]
+            else:
+                first = single
 
             #Make sure that there's an index corresponding to the rank at and directly below the hand.
             if 16 - first > len(ALL_HI):
