@@ -28,7 +28,21 @@ SUITS       = (CLUBS, DIAMONDS, HEARTS, SPADES)
 MIN_RANK    = 2     #deuces
 MAX_RANK    = 14    #aces
 
+###sorting
+
+SUITED = 0
+VALUED = 1
+
 ###ratings
+
+A_HI = 1563
+K_HI = 1004
+Q_HI = 620
+J_HI = 366
+T_HI = 205
+N_HI = 108
+E_HI = 53
+ALL_HI = [A_HI, K_HI, Q_HI, J_HI, T_HI, N_HI, E_HI]
 
 #AKQJTNESXVURW
 NO_HAND = 0
@@ -47,10 +61,11 @@ FTE = 126
 TN = 132
 FTN = 166
 JV = 176
-FJV =
+FJV = 0
 
 DN = [1, 4, 10, 20, 35, 56, 84, 120, 165]
-DELTAS = [1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66]
+DELTAS = [0, 0, 0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45]
+TDELTAS = [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 STRFL = 1
 QUADS = 11
