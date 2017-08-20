@@ -73,15 +73,18 @@ class ChiHand(object):
 
     def _setHands(self, cards, sortmethod, counters, base = 9999):
 
-        mask = list()
+        mask = list()               #Should hold the indices of the cards for the hand to be set
         hand = cards
         sorting = sortmethod
         counts = counters
         newBase = base
-        index = 0
-        single = 0
-        first = 0
-        multiCounter = MULTISEQ
+        index = 0                   #Index of the first singleton that has not been considered yet
+        single = 0                  #Value of the first singleton that hasn't been considered
+        first = 0                   #Value of the highest card that can be played
+        current = 0                 #Value of the highest unprocessed card
+        multiCounter = NOSEQ
+        #MULTISEQ While trips not processed. If no trips, PAIRSEQ while first pair not processed.
+        #NEXTPAIRSEQ while second pair not processed. NOSEQ when everything that isn't singletons have been processed.
 
         if newBase <= A_HI:
             #Make sure the hand is sorted correctly
@@ -105,31 +108,33 @@ class ChiHand(object):
             if len(cards) < 13 and counts[2] > 1:
                 return None     #Same as above
 
+            #Record the rank of non-singleton values
             multiranks = [0, 0, 0]  #For trips, pair, lower pair
             if counts[1] == 1:
                 multiranks[0] = hand[0].getValue()
                 index += 3
+                multiCounter = MULTISEQ
             else:
                 if counts[2] == 2:
                     multiranks[2] == hand[2].getValue()
                     index += 2
+
                 if counts[2] > 0:
                     multiranks[1] == hand[0].getValue()
                     index += 2
-                else:
-                    multiCounter = NOSEQ
+                    multiCounter = PAIRSEQ
 
+            #Process first card of the hand setting
             single = hand[index]._getValue()
 
             if multiranks[0] > single:
                 first = multiranks[0]
-                multiCounter = MULTISEQ
+                multiCounter = MULTICAN
             elif multiranks[1] > single:
                 first = multiranks[1]
-                multiCounter = PAIRSEQ
+                multiCounter = PAIRCAN
             else:
                 first = single
-                index += 1
 
             #Make sure that there's an index corresponding to the rank at and directly below the hand.
             if 16 - first > len(ALL_HI):
@@ -141,24 +146,51 @@ class ChiHand(object):
                 print('Illegal base for the hand setting procedure.\n')
                 return None
 
-            mask.append(first)
-            current = cards[index].getValue()
+            #Record index of the first card in the setting
+            if multiCounter == MULTICAN:
+                mask.append(0)
+                multiCounter = MULTIPRO
+            elif multiCounter == PAIRCAN:
+                mask.append(0)
+                if multiranks[2] > 0:
+                    multiCounter = NEXTPAIRSEQ
+                else:
+                    multiCounter = PAIRPRO
+            else:
+                mask.append(index)
+                index += 1
 
-            if multiCounter = NOSEQ:
+            #Process the second card of the hand setting
+            single = hand[index].getValue()
+
+            if multiCounter = MULTISEQ:
+                if multiranks[0] > single:
+                    current = multiranks[0]
+                    multiCounter = MULTICAN
+                else:
+                    current = single
+            elif multiCounter == NEXTPAIRSEQ:
+                if multiranks[2] > single:
+                    current = multiranks[2]
+                    multiCounter = NEXTPAIRCAN
+                else:
+                    current = single
+            elif multiCounter == PAIRSEQ:
+                if multiranks[1] > single:
+                    current = multiranks[1]
+                    multiCounter = PAIRCAN
+                else:
+                    current = single
+            elif multiCounter not in SINGLES:
+                print('Error in hand setting. Report multiCounter inconsistency.\n')
+                return None
+            else:
+                current = single
+
+            #Make sure that it's possible to create a hand that is less than the base
+            self._checkLegality(newBase, [hand[mask[0]].getValue(), current])
 
             #old stuff, probably not important...
-
-            while(len(mask) < 5 and index < 8):
-                if mask[-1] == current:
-                    curind += 1
-                else:
-
-                    pass
-
-                current = hand[curind].getValue()
-
-
-
         first = hand[0]._getValue()
         summation = 0
         counter = 0
