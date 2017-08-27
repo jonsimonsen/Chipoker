@@ -33,6 +33,12 @@ MAX_RANK    = 14    #aces
 SUITED = 0
 VALUED = 1
 
+#MULTI contains trips. PAIR contains at least one pair.
+#NEXTPAIR contains two pair, with the first already processed.
+#NO contains no pairs.
+#SEQ means that it exists, but is not yet a candidate.
+#CAN means it's a an unprocessed candidate.
+#PRO means that it has been processed.
 MULTISEQ = 0
 MULTICAN = 1
 MULTIPRO = 2
@@ -45,16 +51,72 @@ NEXTPAIRPRO = 8
 NOSEQ = 9
 SINGLES = [MULTIPRO, PAIRPRO, NEXTPAIRPRO, NOSEQ]
 
-###ratings
+##ratings
 
-A_HI = 1563
-K_HI = 1004
-Q_HI = 620
-J_HI = 366
-T_HI = 205
-N_HI = 108
-E_HI = 53
-ALL_HI = [A_HI, K_HI, Q_HI, J_HI, T_HI, N_HI, E_HI]
+###5 cards
+
+A_HI = 1573
+K_HI = 1012
+Q_HI = 627
+J_HI = 372
+T_HI = 210
+N_HI = 112
+E_HI = 56
+S_HI = 26
+X_HI = 11
+V_HI = 4
+F_HI = 1
+R_HI = 0
+W_HI = 0
+DELALL_HI = [A_HI, K_HI, Q_HI, J_HI, T_HI, N_HI, E_HI]
+ALL_HI = [W_HI, R_HI, F_HI, V_HI, X_HI, S_HI, E_HI, N_HI, T_HI, J_HI, Q_HI, K_HI, A_HI]
+
+###4 cards
+
+FK_HI = 561
+FQ_HI = 385
+FJ_HI = 255
+FT_HI = 162
+FN_HI = 98
+FE_HI = 56
+FS_HI = 30
+FX_HI = 15
+FV_HI = 7
+FF_HI = 3
+FR_HI = 1
+FW_HI = 0
+FALL_HI = [FW_HI, FR_HI, FF_HI, FV_HI, FX_HI, FS_HI, FE_HI, FN_HI, FT_HI, FJ_HI, FQ_HI, FK_HI]
+
+###3 cards
+
+RQ_HI = 165
+RJ_HI = 120
+RT_HI = 84
+RN_HI = 56
+RE_HI = 35
+RS_HI = 20
+RX_HI = 10
+RV_HI = 4
+RF_HI = 1
+RR_HI = 0
+RW_HI = 0
+RALL_HI = [RW_HI, RR_HI, RF_HI, RV_HI, RX_HI, RS_HI, RE_HI, RN_HI, RT_HI, RJ_HI, RQ_HI]
+
+###2 cards
+
+WJ_HI = 45
+WT_HI = 36
+WN_HI = 28
+WE_HI = 21
+WS_HI = 15
+WX_HI = 10
+WV_HI = 6
+WF_HI = 3
+WR_HI = 1
+WW_HI = 0
+WALL_HI = [WW_HI, WR_HI, WF_HI, WV_HI, WX_HI, WS_HI, WE_HI, WN_HI, WT_HI, WJ_HI]
+
+TOT_HI = [ALL_HI, FALL_HI, RALL_HI, WALL_HI]
 
 #AKQJTNESXVURW
 NO_HAND = 0
