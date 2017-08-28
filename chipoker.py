@@ -161,7 +161,7 @@ class ChiHand(object):
                 single = hand[index].getValue()
 
             #Process the second card of the hand setting
-            if multiCounter = MULTISEQ:
+            if multiCounter == MULTISEQ:
                 if multiranks[0] > single:
                     current = multiranks[0]
                     multiCounter = MULTICAN
@@ -211,7 +211,7 @@ class ChiHand(object):
             pass
 
 
-    def _getBaseHand(self, base, vals):
+    def _getBaseHand(self, base):
         """Returns a list of the base hand."""
 
         hand = list()   #List for the hand to be returned. Might differ based on the range of the base.
@@ -244,9 +244,7 @@ class ChiHand(object):
         else:
             hand.append(base - baseSum)
 
-
-
-
+        return hand
 
     def _makeHands(self, cards):
         """Starts with a hand and returns the chinese poker hands that can be created as a list of rankings."""
@@ -288,6 +286,13 @@ class ChiHand(object):
         clubs = sum(card._suit == CLUBS for card in self._hand)
         #print(str(spades), str(hearts), str(diamonds), str(clubs))
         return [spades, hearts, diamonds, clubs]
+
+    def _testHicards(self):
+        """Actually used to test that _getBaseHand produces reasonable results"""
+
+        for i in range(S_HI):
+            res = self._getBaseHand(i + 1)
+            print(res)
 
     def printHand(self):
         """Print the cards of the hand."""
