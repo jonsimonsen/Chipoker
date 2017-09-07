@@ -219,30 +219,72 @@ class ChiHand(object):
         baseDif = 0     #Difference between base and baseSum
         count = 0       #Number of appended elements in hand
         rank = 0        #To keep track of the rank of a card
-        elims = 0        #The number of eliminated hands corresponding to the current rank
+        elims = 0       #The number of eliminated hands corresponding to the current rank
 
+
+        #Rewriting...
 
         while count < 4:
-            rank = 2    #Assume lowest possible
-            elims = 0   #Reset the elimination count
-            baseDif = base - baseSum    #Calculate the dif
+            baseDif = base - baseSum
+            rank = 2
 
-            while elims < baseDif:
+            while TOT_HI[count][rank - 2] < baseDif:
                 rank += 1
-                elims = TOT_HI[count[rank - 2]]
 
-            #Must go back since the interesting rank is the one before the eliminations get too high
-            rank -= 1
             hand.append(rank)
+            temp = baseSum
+            baseSum += TOT_HI[count][rank - 3]
             count += 1
-            baseSum += TOT_HI[count[rank - 2]]
+
+            #If the hand is a three card hand, break out of the loop
+            if count == 2 and (temp + TOT_HI[1][rank - 2] - base < rank - 2):
+                baseSum += TOT_HI[2][rank - 3]
+                break
+
+        #hand.append(hand[-1] + baseSum - base)
+        hand.append(base + 1 - baseSum)
+
+#        while count < 4:
+#            baseDif = base - baseSum
+#            rank = 2
+#            elims = 0
+#
+#            while elims <= baseDif:
+#                elims = TOT_HI[count][rank - 2]
+#                rank += 1
+#
+#            if TOT_HI[count][rank - 2] == baseDif
+#
+#            hand.append(rank - 1)
+#            temp = baseSum
+#            baseSum += TOT_HI[count][rank - 3]
+#            count += 1
+#
+#            #If the hand is a three card hand, break out of the loop
+#            if count == 2 and (temp + TOT_HI[1][rank - 3] < base + rank - 3):
+#                break
+
+#        while count < 4:
+#            rank = 1    #Assume lowest possible (should get incremented to 2 before being used)
+#            elims = 0   #Reset the elimination count
+#            baseDif = base - baseSum    #Calculate the dif
+#
+#            while elims < baseDif:
+#                rank += 1
+#                elims = TOT_HI[count][rank - 2]
+#
+#            #Must go back since the interesting rank is the one before the eliminations get too high
+#            rank -= 1
+#            hand.append(rank)
+#            baseSum += TOT_HI[count][rank - 2]
+#            count += 1
 
         #Add final rank
-        if (base - baseSum) >= hand[count - 1]:
-            print('Error in basehand generation.\n')
-            return None
-        else:
-            hand.append(base - baseSum)
+#        if (base - baseSum) >= hand[count - 1]:
+#            print('Error in basehand generation.\n')
+#            return None
+#        else:
+#            hand.append(base + 1 - baseSum)
 
         return hand
 
@@ -290,9 +332,9 @@ class ChiHand(object):
     def _testHicards(self):
         """Actually used to test that _getBaseHand produces reasonable results"""
 
-        for i in range(S_HI):
+        for i in range(A_HI):
             res = self._getBaseHand(i + 1)
-            print(res)
+            print(i + 1, ': ', res)
 
     def printHand(self):
         """Print the cards of the hand."""
