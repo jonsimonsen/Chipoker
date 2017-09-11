@@ -78,11 +78,13 @@ class ChiHand(object):
         sorting = sortmethod
         counts = counters
         newBase = base
+        baseHand = list()           #To hold the ranks of the base hand
         index = 0                   #Index of the first singleton that has not been considered yet
         single = 0                  #Value of the first singleton that hasn't been considered
         first = 0                   #Value of the highest card that can be played
         current = 0                 #Value of the highest unprocessed card
         multiCounter = NOSEQ        #Keeps track of progress for the ranks that have multiple suits present. See config file for details.
+        okBase = False              #Becomes True when the hand being set is confirmed to be smaller than the base
 
         #Base hi-card...
         if newBase <= A_HI:
@@ -135,14 +137,14 @@ class ChiHand(object):
             else:
                 first = single
 
-            #Make sure that there's an index corresponding to the rank at and directly below the hand.
-            if 16 - first > len(DELALL_HI):
-                print('Impossible base for the hand setting procedure.\n')
+            #Get the baseHand and make sure that the base value is within its ranges.
+            baseHand = self._getBaseHand(newBase)
+            if baseHand = None:
                 return None
 
             #Make sure that it's possible to create a hand that is less than the base(step 1)
-            if DELALL_HI[15 - first] > newBase:
-                print('Illegal base for the hand setting procedure.\n')
+            if first > baseHand[0]:
+                print('Illegal base for the hand setting procedure. 1st hicard rank too high.\n')
                 return None
 
             #Record index of the first card in the setting
@@ -161,34 +163,54 @@ class ChiHand(object):
                 single = hand[index].getValue()
 
             #Process the second card of the hand setting
-            if multiCounter == MULTISEQ:
-                if multiranks[0] > single:
-                    current = multiranks[0]
-                    multiCounter = MULTICAN
+            while len(mask) < 2:
+                if multiCounter == MULTISEQ:
+                    if multiranks[0] > single:
+                        current = multiranks[0]
+                        multiCounter = MULTICAN
+                    else:
+                        current = single
+                elif multiCounter == NEXTPAIRSEQ:
+                    if multiranks[2] > single:
+                        current = multiranks[2]
+                        multiCounter = NEXTPAIRCAN
+                    else:
+                        current = single
+                elif multiCounter == PAIRSEQ:
+                    if multiranks[1] > single:
+                        current = multiranks[1]
+                        multiCounter = PAIRCAN
+                    else:
+                        current = single
+                elif multiCounter not in SINGLES:
+                    print('Error in hand setting. Report multiCounter inconsistency.\n')
+                    return None
                 else:
                     current = single
-            elif multiCounter == NEXTPAIRSEQ:
-                if multiranks[2] > single:
-                    current = multiranks[2]
-                    multiCounter = NEXTPAIRCAN
-                else:
-                    current = single
-            elif multiCounter == PAIRSEQ:
-                if multiranks[1] > single:
-                    current = multiranks[1]
-                    multiCounter = PAIRCAN
-                else:
-                    current = single
-            elif multiCounter not in SINGLES:
-                print('Error in hand setting. Report multiCounter inconsistency.\n')
-                return None
-            else:
-                current = single
 
-            #Make sure that it's possible to create a hand that is less than the base
-            self._checkLegality(newBase, [hand[mask[0]].getValue(), current])
+                #Make sure that it's possible to create a hand that is less than the base
+                if (not okBase) and current > baseHand[1]:   #Should do some adjustments, since the base is not necessarily illegal...
+                    if current == single:
+                        index += 1
+                        single = hand[index].getValue()
+                elif multiCounter == MULTICAN:
+                    mask.append(0)
+                    multiCounter = MULTIPRO
+                elif multiCounter == PAIRCAN:
+                    mask.append(0)
+                    if multiranks[2] > 0:
+                        multiCounter = NEXTPAIRSEQ
+                    else:
+                        multiCounter = PAIRPRO
+                elif multiCounter == NEXTPAIRCAN:
+                    mask.append(2)
+                    multiCounter = NEXTPAIRPRO
+                else:
+                    mask.append(index)
+                    index += 1
+                    single = hand[index].getValue()
 
-            #old stuff, probably not important...
+        #old stuff, probably not important...
         first = hand[0]._getValue()
         summation = 0
         counter = 0
@@ -205,12 +227,6 @@ class ChiHand(object):
                 summation += delta
                 counter += 1
 
-
-        #If base is hicard...
-        if base <= MAX_HI:
-            pass
-
-
     def _getBaseHand(self, base):
         """Returns a list of the base hand."""
 
@@ -221,74 +237,35 @@ class ChiHand(object):
         rank = 0        #To keep track of the rank of a card
         elims = 0       #The number of eliminated hands corresponding to the current rank
 
+        if base <= 0:
+            print('Illegal function argument to _getBaseHand. Must be greater than 0.\n')
+            return None
+        elif base <= A_HI:
+            while count < 4:
+                baseDif = base - baseSum
+                rank = 2
 
-        #Rewriting...
+                while TOT_HI[count][rank - 2] < baseDif:
+                    rank += 1
 
-        while count < 4:
-            baseDif = base - baseSum
-            rank = 2
+                hand.append(rank)
+                temp = baseSum
+                baseSum += TOT_HI[count][rank - 3]
+                count += 1
 
-            while TOT_HI[count][rank - 2] < baseDif:
-                rank += 1
+                #If the hand is a three card hand, break out of the loop
+                if count == 2 and (temp + TOT_HI[1][rank - 2] - base < rank - 2):
+                    baseSum += TOT_HI[2][rank - 3]
+                    break
 
-            hand.append(rank)
-            temp = baseSum
-            baseSum += TOT_HI[count][rank - 3]
-            count += 1
+            #hand.append(hand[-1] + baseSum - base)
+            hand.append(base + 1 - baseSum)
+            return hand     #Should move this outside once different hand types are supported
+        else:
+            print('_getBaseHand error. The given base is not supported yet.\n')     #When done, should say that the base is too high.
+            return None
 
-            #If the hand is a three card hand, break out of the loop
-            if count == 2 and (temp + TOT_HI[1][rank - 2] - base < rank - 2):
-                baseSum += TOT_HI[2][rank - 3]
-                break
-
-        #hand.append(hand[-1] + baseSum - base)
-        hand.append(base + 1 - baseSum)
-
-#        while count < 4:
-#            baseDif = base - baseSum
-#            rank = 2
-#            elims = 0
-#
-#            while elims <= baseDif:
-#                elims = TOT_HI[count][rank - 2]
-#                rank += 1
-#
-#            if TOT_HI[count][rank - 2] == baseDif
-#
-#            hand.append(rank - 1)
-#            temp = baseSum
-#            baseSum += TOT_HI[count][rank - 3]
-#            count += 1
-#
-#            #If the hand is a three card hand, break out of the loop
-#            if count == 2 and (temp + TOT_HI[1][rank - 3] < base + rank - 3):
-#                break
-
-#        while count < 4:
-#            rank = 1    #Assume lowest possible (should get incremented to 2 before being used)
-#            elims = 0   #Reset the elimination count
-#            baseDif = base - baseSum    #Calculate the dif
-#
-#            while elims < baseDif:
-#                rank += 1
-#                elims = TOT_HI[count][rank - 2]
-#
-#            #Must go back since the interesting rank is the one before the eliminations get too high
-#            rank -= 1
-#            hand.append(rank)
-#            baseSum += TOT_HI[count][rank - 2]
-#            count += 1
-
-        #Add final rank
-#        if (base - baseSum) >= hand[count - 1]:
-#            print('Error in basehand generation.\n')
-#            return None
-#        else:
-#            hand.append(base + 1 - baseSum)
-
-        return hand
-
-    def _makeHands(self, cards):
+    def _makeHands(self, cards):    #This seems like an old implementation that should probably get deleted.
         """Starts with a hand and returns the chinese poker hands that can be created as a list of rankings."""
 
         foot = 0
