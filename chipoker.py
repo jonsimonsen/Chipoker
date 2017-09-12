@@ -85,6 +85,7 @@ class ChiHand(object):
         current = 0                 #Value of the highest unprocessed card
         multiCounter = NOSEQ        #Keeps track of progress for the ranks that have multiple suits present. See config file for details.
         okBase = False              #Becomes True when the hand being set is confirmed to be smaller than the base
+        Legality = True             #To keep track of the possibility that a legal hand can be set.
 
         #Base hi-card...
         if newBase <= A_HI:
@@ -146,6 +147,8 @@ class ChiHand(object):
             if first > baseHand[0]:
                 print('Illegal base for the hand setting procedure. 1st hicard rank too high.\n')
                 return None
+            elif first < baseHand[0]:
+                okBase = True
 
             #Record index of the first card in the setting
             if multiCounter == MULTICAN:
@@ -164,6 +167,47 @@ class ChiHand(object):
 
             #Process the second card of the hand setting
             while len(mask) < 2:
+                #Handle hands that doesn't have enough remaining candidates to be created
+                if multiCounter in SINGLES:
+                    if len(hand) < 8 and index >= len(hand) - 1:
+                        print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
+                        legality = False
+                    elif len(hand) >= 8 and index >= len(hand) - 3:
+                        print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
+                        legality = False
+                elif multiCounter == MULTISEQ:
+                    if len(hand) < 8:   #This should never happen
+                        print('Illegal base (hicard) for the hand setting procedure. Trips should be eliminated from hand with less than 13 cards.\n)
+                        legality = False
+                    elif len(hand) >= 8 and index >= len(hand) - 2:
+                        print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
+                        legality = False
+                elif multiCounter == NEXTPAIRSEQ:
+                    if len(hand) < 13: #This should never happen
+                        print('Illegal base (hicard) for the hand setting procedure. Two pairs should be eliminated from hand with less than 13 cards.\n)
+                        legality = False
+                    elif len(hand) == 13 and index >= len(hand) - 2:
+                        print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
+                        legality = False
+                elif multiCounter == PAIRSEQ:
+                    if len(hand) < 8: #This should never happen
+                        print('Illegal base (hicard) for the hand setting procedure. Pairs should be eliminated from hand with less than 8 cards.\n)
+                        legality = False
+                    elif multiranks[2] > 0:
+                        if len(hand) < 13:
+                            print('Illegal base (hicard) for the hand setting procedure. Two pairs should be eliminated from hand with less than 13 cards.\n)
+                            legality = False
+                        elif len(hand) == 13 and index >= len(hand) - 1:
+                            print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
+                            legality = False
+                    else:
+                        if len(hand) < 8:
+                            print('Illegal base (hicard) for the hand setting procedure. Pairs should be eliminated from hand with less than 8 cards.\n)
+                            legality = False
+                        elif index >= len(hand) - 2:
+                            print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
+                            legality = False
+
                 if multiCounter == MULTISEQ:
                     if multiranks[0] > single:
                         current = multiranks[0]
@@ -193,39 +237,54 @@ class ChiHand(object):
                     if current == single:
                         index += 1
                         single = hand[index].getValue()
-                elif multiCounter == MULTICAN:
-                    mask.append(0)
-                    multiCounter = MULTIPRO
-                elif multiCounter == PAIRCAN:
-                    mask.append(0)
-                    if multiranks[2] > 0:
-                        multiCounter = NEXTPAIRSEQ
                     else:
-                        multiCounter = PAIRPRO
-                elif multiCounter == NEXTPAIRCAN:
-                    mask.append(2)
-                    multiCounter = NEXTPAIRPRO
+                        if multiCounter == MULTICAN:
+                            print('Illegal base for the hand setting procedure. 2nd hicard rank (trips) is too high.\n)
+                            return None
+                        elif multiCounter == PAIRCAN:
+                            if multiranks[2] > 0:
+                                multiCounter = NEXTPAIRSEQ
+                            else:
+                                multiCounter = PAIRPRO
+                        elif multiCounter == NEXTPAIRCAN:
+                            multiCounter = NEXTPAIRPRO
                 else:
-                    mask.append(index)
-                    index += 1
-                    single = hand[index].getValue()
+                    if (not okBase) and current < baseHand[1]:
+                        okBase = True
 
-        #old stuff, probably not important...
-        first = hand[0]._getValue()
-        summation = 0
-        counter = 0
+                    if multiCounter == MULTICAN:
+                        mask.append(0)
+                        multiCounter = MULTIPRO
+                    elif multiCounter == PAIRCAN:
+                        mask.append(0)
+                        if multiranks[2] > 0:
+                            multiCounter = NEXTPAIRSEQ
+                        else:
+                            multiCounter = PAIRPRO
+                    elif multiCounter == NEXTPAIRCAN:
+                        mask.append(2)
+                        multiCounter = NEXTPAIRPRO
+                    else:
+                        mask.append(index)
+                        index += 1
+                        single = hand[index].getValue()
 
-        if first > 9:
-            summation = 79
-            counter = 10
-
-            while counter < first:
-                delta = 0
-                tdelta = 0
-                for i in range(counter):
-                    delta += DELTAS[i]
-                summation += delta
-                counter += 1
+        # #old stuff, probably not important...
+        # first = hand[0]._getValue()
+        # summation = 0
+        # counter = 0
+        #
+        # if first > 9:
+        #     summation = 79
+        #     counter = 10
+        #
+        #     while counter < first:
+        #         delta = 0
+        #         tdelta = 0
+        #         for i in range(counter):
+        #             delta += DELTAS[i]
+        #         summation += delta
+        #         counter += 1
 
     def _getBaseHand(self, base):
         """Returns a list of the base hand."""
