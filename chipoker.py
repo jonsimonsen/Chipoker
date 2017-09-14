@@ -166,6 +166,8 @@ class ChiHand(object):
             #Process the second card of the hand setting
             while len(mask) < 2:
                 #Handle hands that doesn't have enough remaining candidates to be created
+                hasTwoPairs = (multiranks[2] > 0)     #assignment based on eval of parenthesised expression
+                legality = _enoughRemaining(multiCounter, len(hand), index, hasTwoPairs)
                 if multiCounter in SINGLES:
                     if (len(hand) < 8 and index >= len(hand) - 1) or (len(hand) >= 8 and index >= len(hand) - 3):
                         print(ERR_A)
@@ -202,6 +204,48 @@ class ChiHand(object):
                         elif index >= len(hand) - 2:
                             print(ERR_A)
                             legality = False
+
+    def _enoughRemaining(multiCount, remaining, nextSingle, hasMultiples):
+        'If enough candidates to fill the hand remains, returns True. Otherwise, prints an appropriate error message and returns False.'
+
+        if multiCount in SINGLES:
+            if (len(hand) < 8 and index >= len(hand) - 1) or (len(hand) >= 8 and index >= len(hand) - 3):
+                print(ERR_A)
+                legality = False
+        elif multiCount == MULTISEQ:
+            if len(hand) < 8:   #This should never happen
+                print(ERR_HI + ERR_B)
+                legality = False
+            elif len(hand) >= 8 and index >= len(hand) - 2:
+                print(ERR_A)
+                legality = False
+        elif multiCount == NEXTPAIRSEQ:
+            if len(hand) < 13: #This should never happen
+                print(ERR_HI + ERR_C)
+                legality = False
+            elif len(hand) == 13 and index >= len(hand) - 2:
+                print(ERR_A)
+                legality = False
+        elif multiCount == PAIRSEQ:
+            if len(hand) < 8: #This should never happen
+                print(ERR_HI + ERR_D)
+                legality = False
+            elif multiranks[2] > 0:
+                if len(hand) < 13:
+                    print(ERR_HI + ERR_C)
+                    legality = False
+                elif len(hand) == 13 and index >= len(hand) - 1:
+                    print(ERR_A)
+                    legality = False
+            else:
+                if len(hand) < 8:
+                    print(ERR_HI + ERR_D)
+                    legality = False
+                elif index >= len(hand) - 2:
+                    print(ERR_A)
+                    legality = False
+
+            'cut here.'
 
                 if multiCounter == MULTISEQ:
                     if multiranks[0] > single:
