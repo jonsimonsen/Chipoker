@@ -153,3 +153,11 @@ HICARD = 5065
 TTRIPS = 1
 TPAIR = 14
 THICARD = 872
+
+##Error messages
+
+ERR_A = 'Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n'
+ERR_HI = 'Illegal base (hicard) for the hand setting procedure. '   #Should always be concatenated by one of B-D (or equivalent)
+ERR_B = 'Trips should be eliminated from hand with less than 13 cards.\n'
+ERR_C = 'Two pairs should be eliminated from hand with less than 13 cards.\n'
+ERR_D = 'Pairs should be eliminated from hand with less than 8 cards.\n'
