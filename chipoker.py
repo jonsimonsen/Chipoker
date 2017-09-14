@@ -10,13 +10,11 @@ class ChiHand(object):
         """Create a new random hand for chinese poker."""
 
         self._hand = dealer.dealCards(HAND_SIZE)
-        self._sortHand() #Planning to sort by suits(most frequent first), then values descending.
+        self._suitSort() #Planning to sort by suits(most frequent first), then values descending.
         self._suitCounts = self._countSuits()
         print(str(self._suitCounts))
 
-        #self._makeHands(self._hand)
-
-    def _sortHand(self):
+    def _suitSort(self):
         """Sort the hand by suits(most frequent first), then by values descending."""
 
         self._hand.sort(key=attrgetter('_suit', '_value'), reverse=True)
@@ -145,7 +143,7 @@ class ChiHand(object):
 
             #Make sure that it's possible to create a hand that is less than the base(step 1)
             if first > baseHand[0]:
-                print('Illegal base for the hand setting procedure. 1st hicard rank too high.\n')
+                print(ERR_AA)
                 return None
             elif first < baseHand[0]:
                 okBase = True
@@ -169,43 +167,40 @@ class ChiHand(object):
             while len(mask) < 2:
                 #Handle hands that doesn't have enough remaining candidates to be created
                 if multiCounter in SINGLES:
-                    if len(hand) < 8 and index >= len(hand) - 1:
-                        print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
-                        legality = False
-                    elif len(hand) >= 8 and index >= len(hand) - 3:
-                        print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
+                    if (len(hand) < 8 and index >= len(hand) - 1) or (len(hand) >= 8 and index >= len(hand) - 3):
+                        print(ERR_A)
                         legality = False
                 elif multiCounter == MULTISEQ:
                     if len(hand) < 8:   #This should never happen
-                        print('Illegal base (hicard) for the hand setting procedure. Trips should be eliminated from hand with less than 13 cards.\n)
+                        print(ERR_HI + ERR_B)
                         legality = False
                     elif len(hand) >= 8 and index >= len(hand) - 2:
-                        print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
+                        print(ERR_A)
                         legality = False
                 elif multiCounter == NEXTPAIRSEQ:
                     if len(hand) < 13: #This should never happen
-                        print('Illegal base (hicard) for the hand setting procedure. Two pairs should be eliminated from hand with less than 13 cards.\n)
+                        print(ERR_HI + ERR_C)
                         legality = False
                     elif len(hand) == 13 and index >= len(hand) - 2:
-                        print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
+                        print(ERR_A)
                         legality = False
                 elif multiCounter == PAIRSEQ:
                     if len(hand) < 8: #This should never happen
-                        print('Illegal base (hicard) for the hand setting procedure. Pairs should be eliminated from hand with less than 8 cards.\n)
+                        print(ERR_HI + ERR_D)
                         legality = False
                     elif multiranks[2] > 0:
                         if len(hand) < 13:
-                            print('Illegal base (hicard) for the hand setting procedure. Two pairs should be eliminated from hand with less than 13 cards.\n)
+                            print(ERR_HI + ERR_C)
                             legality = False
                         elif len(hand) == 13 and index >= len(hand) - 1:
-                            print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
+                            print(ERR_A)
                             legality = False
                     else:
                         if len(hand) < 8:
-                            print('Illegal base (hicard) for the hand setting procedure. Pairs should be eliminated from hand with less than 8 cards.\n)
+                            print(ERR_HI + ERR_D)
                             legality = False
                         elif index >= len(hand) - 2:
-                            print('Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n)
+                            print(ERR_A)
                             legality = False
 
                 if multiCounter == MULTISEQ:
@@ -239,7 +234,7 @@ class ChiHand(object):
                         single = hand[index].getValue()
                     else:
                         if multiCounter == MULTICAN:
-                            print('Illegal base for the hand setting procedure. 2nd hicard rank (trips) is too high.\n)
+                            print(ERR_AB)
                             return None
                         elif multiCounter == PAIRCAN:
                             if multiranks[2] > 0:
@@ -317,7 +312,6 @@ class ChiHand(object):
                     baseSum += TOT_HI[2][rank - 3]
                     break
 
-            #hand.append(hand[-1] + baseSum - base)
             hand.append(base + 1 - baseSum)
             return hand     #Should move this outside once different hand types are supported
         else:
