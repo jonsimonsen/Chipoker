@@ -156,6 +156,7 @@ THICARD = 872
 
 ##Error messages
 
+ERR_ERARG = ' Report _enoughRemaining error.\n'
 ERR_AA = 'Illegal base for the hand setting procedure. 1st hicard rank too high.\n'
 ERR_AB = 'Illegal base for the hand setting procedure. 2nd hicard rank (trips) is too high.\n'
 ERR_A = 'Illegal base for the hand setting procedure. 2nd hicard rank is too high for all possible hands.\n'

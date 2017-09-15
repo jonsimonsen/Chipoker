@@ -167,7 +167,7 @@ class ChiHand(object):
             while len(mask) < 2:
                 #Handle hands that doesn't have enough remaining candidates to be created
                 hasTwoPairs = (multiranks[2] > 0)     #assignment based on eval of parenthesised expression
-                legality = _enoughRemaining(multiCounter, len(hand), index, hasTwoPairs)
+                legality = _enoughRemaining(multiCounter, len(mask), len(hand), index, hasTwoPairs)
                 if multiCounter in SINGLES:
                     if (len(hand) < 8 and index >= len(hand) - 1) or (len(hand) >= 8 and index >= len(hand) - 3):
                         print(ERR_A)
@@ -205,47 +205,78 @@ class ChiHand(object):
                             print(ERR_A)
                             legality = False
 
-    def _enoughRemaining(multiCount, remaining, nextSingle, hasMultiples):
-        'If enough candidates to fill the hand remains, returns True. Otherwise, prints an appropriate error message and returns False.'
+    def _enoughRemaining(multiCount, processed, remaining, nextSingle, hasMultiples):
+        '''Returns True if enough candidates to fill the hand remains. Otherwise, prints an appropriate error message and returns False.
+
+        multiCount: The available values should be specified in the config file. MULTISEQ should be the smallest and NOSEQ the highest.
+        processed: The number of cards for the current hand (back, middle or front) that have been processed. Should be at least 1 before calling this method.
+        remaining: The number of cards in the pool of candidates for this hand (back, middle or front). This should include cards that have already been processed (included or excluded from the hand).
+        nextSingle: Index of the next singleton value in the card pool (sorted using "VALUED" sorting).
+        hasMultiples: Should be True if there are more than a single pair in the card pool, False otherwise.
+        '''
+
+        message = ''
+
+        #Verify that the input is within expected range
+        if multiCount not in SINGLES:
+            if remaining - nextSingle <
+        if multiCount not in range(NOSEQ + 1):
+            message = 'multiCount not in range.'
+        elif processed not in range(1, 5):
+            message = 'processed not in range (1-4).'
+        elif remaining not in range(3, 14):
+            message = 'remaining not in range (3-13).'
+        elif remaining < 8 and processed > 2:
+            message = 'remaining and processed inconsistency.'
+        elif nextSingle not in range(13):
+            message = 'nextSingle not in range (0-12).'
+        elif nextSingle >= remaining:
+            message = 'nextSingle and remaining inconsistency.'
+
+        if message:
+            print(message + ERR_ERARG)
+            return False
+
+        if remaining < 8:
+            handSize = 3
+        else:
+            handSize = 5
+
+        breakPoint = remaining + processed - handSize
 
         if multiCount in SINGLES:
-            if (len(hand) < 8 and index >= len(hand) - 1) or (len(hand) >= 8 and index >= len(hand) - 3):
-                print(ERR_A)
-                legality = False
+            #if (remaining < 8 and nextSingle >= remaining - 1) or (remaining >= 8 and nextSingle >= remaining - 3):
+            if nextSingle > breakPoint
+                message = ERR_A
         elif multiCount == MULTISEQ:
-            if len(hand) < 8:   #This should never happen
-                print(ERR_HI + ERR_B)
-                legality = False
-            elif len(hand) >= 8 and index >= len(hand) - 2:
-                print(ERR_A)
-                legality = False
+            if remaining < 8:   #This should never happen
+                message = ERR_HI + ERR_B
+            elif nextSingle > breakPoint + 1:
+                message = ERR_A
         elif multiCount == NEXTPAIRSEQ:
-            if len(hand) < 13: #This should never happen
-                print(ERR_HI + ERR_C)
-                legality = False
-            elif len(hand) == 13 and index >= len(hand) - 2:
-                print(ERR_A)
-                legality = False
+            if remaining < 13: #This should never happen
+                message = ERR_HI + ERR_C
+            elif remaining == 13 and nextSingle >= remaining - 2:
+                message = ERR_A
         elif multiCount == PAIRSEQ:
-            if len(hand) < 8: #This should never happen
-                print(ERR_HI + ERR_D)
-                legality = False
+            if remaining < 8: #This should never happen
+                message = ERR_HI + ERR_D
             elif multiranks[2] > 0:
-                if len(hand) < 13:
-                    print(ERR_HI + ERR_C)
-                    legality = False
-                elif len(hand) == 13 and index >= len(hand) - 1:
-                    print(ERR_A)
-                    legality = False
+                if remaining < 13:
+                    message = ERR_HI + ERR_C
+                elif remaining == 13 and nextSingle >= remaining - 1:
+                    message = ERR_A
             else:
-                if len(hand) < 8:
-                    print(ERR_HI + ERR_D)
-                    legality = False
-                elif index >= len(hand) - 2:
-                    print(ERR_A)
-                    legality = False
+                if remaining < 8:
+                    message = ERR_HI + ERR_D
+                elif nextSingle >= remaining - 2:
+                    message = ERR_A
 
-            'cut here.'
+        if message:
+            print(message)
+            return False
+        else:
+            return True
 
                 if multiCounter == MULTISEQ:
                     if multiranks[0] > single:
